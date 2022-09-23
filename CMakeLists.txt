@@ -10,7 +10,9 @@ find_package(CURL REQUIRED)
 include_directories(${CURL_INCLUDE_DIR})
 
 add_executable(LichessToDB main.cpp
-"include/cxxopts/cxxopts.hpp")
+"include/cxxopts/cxxopts.hpp"
+"include/indicators/indicators.hpp"
+"src/Downloader.cpp")
 
 target_link_libraries(LichessToDB ${CURL_LIBRARIES})
 

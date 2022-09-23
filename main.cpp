@@ -1,6 +1,9 @@
 #include <iostream>
 #include <string>
+#include <unistd.h>
 #include "include/cxxopts/cxxopts.hpp"
+#include "include/indicators/indicators.hpp"
+#include "src/Downloader.hpp"
 
 
 int main(int argc, char** argv) {
@@ -15,7 +18,26 @@ int main(int argc, char** argv) {
 
     auto result = options.parse(argc, argv);
 
-    //int debug = result["extract"].as<int>();
+    Downloader::Init();
+    Downloader downloader = Downloader();
+    //downloader.AddDownload("https://database.lichess.org/standard/list.txt", result["p"].as<std::string>() + "/download_list.txt");
+    downloader.AddDownload("https://database.lichess.org/standard/lichess_db_standard_rated_2015-06.pgn.bz2", result["p"].as<std::string>() + "/2015-06.txt");
+    
+    using namespace indicators;
+    ProgressBar bar {
+        option::BarWidth{50},
+        option::Start{"["},
+        option::Fill{"■"},
+        option::Lead{"■"},
+        option::Remainder{"-"},
+        option::End{"]"},
+        option::ShowPercentage{true},
+        option::ShowElapsedTime{true}
+    };
 
+    while (downloader.Update()) {
+        bar.set_progress(downloader.GetDownloadProgress());
+    }
+    Downloader::Clean();
     return 0;
 }
