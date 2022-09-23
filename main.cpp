@@ -20,23 +20,30 @@ int main(int argc, char** argv) {
 
     Downloader::Init();
     Downloader downloader = Downloader();
-    //downloader.AddDownload("https://database.lichess.org/standard/list.txt", result["p"].as<std::string>() + "/download_list.txt");
+    downloader.AddDownload("https://database.lichess.org/standard/list.txt", result["p"].as<std::string>() + "/download_list.txt");
     downloader.AddDownload("https://database.lichess.org/standard/lichess_db_standard_rated_2015-06.pgn.bz2", result["p"].as<std::string>() + "/2015-06.txt");
     
     using namespace indicators;
-    ProgressBar bar {
-        option::BarWidth{50},
-        option::Start{"["},
-        option::Fill{"■"},
-        option::Lead{"■"},
-        option::Remainder{"-"},
-        option::End{"]"},
-        option::ShowPercentage{true},
-        option::ShowElapsedTime{true}
-    };
 
-    while (downloader.Update()) {
-        bar.set_progress(downloader.GetDownloadProgress());
+    while (downloader.LoadNextDownload()) {
+        printf("Beginning Download...\n");
+        ProgressBar bar {
+                option::BarWidth{50},
+                option::Start{"["},
+                option::Fill{"■"},
+                option::Lead{"■"},
+                option::Remainder{"-"},
+                option::End{"]"},
+                option::ShowPercentage{true},
+                option::ShowElapsedTime{true}
+        };
+        while (downloader.Update()) {
+            double progress = downloader.GetDownloadProgress();
+            bar.set_progress(downloader.GetDownloadProgress() * 100);
+            sleep(1);
+        }
+        bar.set_progress(100);
+        printf("Finished Download\n");
     }
     Downloader::Clean();
     return 0;

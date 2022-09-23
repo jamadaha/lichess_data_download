@@ -20,16 +20,15 @@ void Downloader::Clean() {
 void Downloader::AddDownload(std::string url, std::string path) {
     AddDir(path);
     downloads.push_back(Download(url, path));
-    LoadNextDownload();
 }
 
 double Downloader::GetDownloadProgress() {
     return downloads[0].progress->progressPercent;
 }
 
-void Downloader::LoadNextDownload() {
+bool Downloader::LoadNextDownload() {
     if (downloads.size() == 0)
-        return;
+        return false;
     Download download = downloads[0];
 
     FILE* file = fopen(download.path.c_str(), "wb");
@@ -43,18 +42,16 @@ void Downloader::LoadNextDownload() {
     curl_easy_setopt(transfer, CURLOPT_PROGRESSFUNCTION, xferinfo);
     curl_easy_setopt(transfer, CURLOPT_NOPROGRESS, false);
     curl_multi_add_handle(multiHandle, transfer);
+    return true;
 }
 
 bool Downloader::Update() {
     int runningCount = 0;
     curl_multi_perform(multiHandle, &runningCount);
-    if (runningCount == 0)
-        return 0;
     CURLMsg *msg;
     int msgs_left = -1;
     while((msg = curl_multi_info_read(multiHandle, &msgs_left))) {
         if(msg->msg == CURLMSG_DONE) {
-            printf("qwe\n");
             CURL *e = msg->easy_handle;
             curl_multi_remove_handle(multiHandle, e);
             curl_easy_cleanup(e);

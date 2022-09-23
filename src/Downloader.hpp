@@ -39,6 +39,7 @@ public:
     static void Init();
     static void Clean();
     void AddDownload(std::string url, std::string path);
+    bool LoadNextDownload();
     double GetDownloadProgress();
     bool Update();
 
@@ -47,7 +48,7 @@ private:
     CURLM* multiHandle;
     static size_t Write(void *ptr, size_t size, size_t nmemb, void *stream);
     static int xferinfo(void *ptr, double dltotal, double dlnow, double ultotal, double ulnow);
-    void LoadNextDownload();
+    
     void AddDir(std::string path);
 };
 
