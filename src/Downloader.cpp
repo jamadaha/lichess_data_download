@@ -26,6 +26,10 @@ double Downloader::GetDownloadProgress() {
     return downloads[0]->progress->progressPercent;
 }
 
+std::string Downloader::GetDownloadLink() {
+    return downloads[0]->url;
+}
+
 bool Downloader::LoadNextDownload() {
     if (downloads.size() == 0)
         return false;

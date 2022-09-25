@@ -12,16 +12,35 @@
 class DownloadParser {
 public:
     static std::vector<Download> GetDownloads(std::string path) {
+        printf("Getting possible downloads... "); fflush(stdout);
         Downloader downloader = Downloader();
         std::string downloadListPath = path + "/download_list.txt";
         downloader.AddDownload("https://database.lichess.org/standard/list.txt", downloadListPath);
 
         downloader.LoadNextDownload();
-        std::cout << "Getting possible downloads... ";
         while(downloader.Update()) { sleep(1); }
         std::cout << "Finished\n";
         return ParseDownloadFile(downloadListPath);
     };
+
+    static std::vector<Download> GetRange(std::vector<Download> downloads, std::string range) {
+        return GetRange(downloads, std::atoi(range.substr(3, 7).c_str()), std::atoi(range.substr(0, 2).c_str()), 
+                        std::atoi(range.substr(11, 15).c_str()), std::atoi(range.substr(8, 10).c_str()));
+    }
+
+    static std::vector<Download> GetRange(std::vector<Download> downloads, int fromY, int fromM, int toY, int toM) {
+        std::vector<Download> rangedDownloads;
+        for (auto down : downloads) {
+            if (down.year >= fromY && down.year < toY) {
+                if (down.month >= fromM)
+                    rangedDownloads.push_back(down);
+            } else if (down.year >= fromY && down.year == toY) {
+                if (down.month >= fromM && down.month <= toM)
+                    rangedDownloads.push_back(down);
+            }
+        }
+        return rangedDownloads;
+    }
 
 private:
     static std::vector<Download> ParseDownloadFile(std::string filePath) {

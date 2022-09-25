@@ -5,6 +5,7 @@
 #include "include/indicators/indicators.hpp"
 #include "src/Downloader.hpp"
 #include "src/DownloadParser.hpp"
+#include "src/Utilities.hpp"
 
 
 int main(int argc, char** argv) {
@@ -13,20 +14,30 @@ int main(int argc, char** argv) {
     options.add_options()
         ("h,help", "Print usage")
         ("p,path", "Temporary path for download and extraction", cxxopts::value<std::string>()->default_value("./Temp"))
-        ("r,range", "Download all months within the spcified range", cxxopts::value<std::string>()->default_value("01/2013-12/2021"))
+        ("r,range", "Download all months within the spcified range", cxxopts::value<std::string>()->default_value("01/2013-01/2014"))
         ("e,extract", "Extract downloaded files", cxxopts::value<int>()->default_value("1"))
     ;
 
     auto result = options.parse(argc, argv);
 
+    if (result.count("help")) {
+        std::cout << options.help() << std::endl; exit(0);
+    }
+
+    std::cout << Utilities::BoldOn << "----BEGINNING DOWNLOAD----" << Utilities::BoldOff << std::endl;
     Downloader::Init();
     
-    DownloadParser::GetDownloads(result["p"].as<std::string>());
-
-/*    using namespace indicators;
+    std::vector<Download> allDownloads = DownloadParser::GetDownloads(result["p"].as<std::string>());
+    std::vector<Download> rangedDownloads = DownloadParser::GetRange(allDownloads, result["r"].as<std::string>());
+    Downloader downloader = Downloader();
+    for (int i = rangedDownloads.size() - 1; i >= 0; i--) {
+        Download download = rangedDownloads[i];
+        downloader.AddDownload(download.link, result["p"].as<std::string>() + "/Downloads/" + std::to_string(download.year) + "-" + std::to_string(download.month) + ".pgn.bz2");
+    }
+    using namespace indicators;
 
     while (downloader.LoadNextDownload()) {
-        printf("Beginning Download...\n");
+        std::cout << Utilities::BoldOn << "Downloading " << Utilities::BoldOff << downloader.GetDownloadLink() << std::endl;
         ProgressBar bar {
                 option::BarWidth{50},
                 option::Start{"["},
@@ -43,9 +54,8 @@ int main(int argc, char** argv) {
             sleep(1);
         }
         bar.set_progress(100);
-        printf("Finished Download\n");
-    }*/
+    }
     Downloader::Clean();
-
+    std::cout << Utilities::BoldOn << "----FINISHED DOWNLOAD----" << Utilities::BoldOff << std::endl;
     return 0;
 }

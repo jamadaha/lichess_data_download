@@ -14,7 +14,8 @@ add_executable(LichessToDB main.cpp
 "include/indicators/indicators.hpp"
 "src/Download.hpp"
 "src/Downloader.cpp"
-"src/DownloadParser.hpp")
+"src/DownloadParser.hpp"
+"src/Utilities.hpp")
 
 target_link_libraries(LichessToDB ${CURL_LIBRARIES})
 

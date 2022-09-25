@@ -46,6 +46,7 @@ public:
     void AddDownload(std::string url, std::string path);
     bool LoadNextDownload();
     double GetDownloadProgress();
+    std::string GetDownloadLink();
     bool Update();
 
 private:
