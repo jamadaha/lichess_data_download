@@ -17,7 +17,7 @@ public:
         printf("Getting possible downloads... "); fflush(stdout);
         Downloader downloader = Downloader();
         std::string downloadListPath = path + "/download_list.txt";
-        downloader.AddDownload("https://database.lichess.org/standard/list.txt", downloadListPath);
+        downloader.AddDownload("https://database.lichess.org/standard/list.txt", downloadListPath, DownloadType::Text);
 
         downloader.LoadNextDownload();
         while(downloader.Update()) { std::this_thread::sleep_for(std::chrono::milliseconds(100)); }

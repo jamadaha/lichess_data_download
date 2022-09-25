@@ -17,9 +17,9 @@ void Downloader::Clean() {
     curl_global_cleanup();
 }
 
-void Downloader::AddDownload(std::string url, std::string path) {
+void Downloader::AddDownload(std::string url, std::string path, DownloadType downloadType) {
     AddDir(path);
-    downloads.emplace(downloads.end(), new FileDownload(url, path));
+    downloads.emplace(downloads.end(), new FileDownload(url, path, downloadType));
 }
 
 double Downloader::GetDownloadProgress() {
@@ -34,15 +34,19 @@ bool Downloader::LoadNextDownload() {
     if (downloads.size() == 0)
         return false;
     FileDownload *download = downloads[0];
-
-    download->file = new std::ofstream;
-
-    download->file->open(download->path.c_str());//= fopen64(download.path.c_str(), "wb");
-    
     CURL *transfer = curl_easy_init();
-    curl_easy_setopt(transfer, CURLOPT_WRITEFUNCTION, Write);
+    if (download->downloadType == DownloadType::Binary) {
+        download->bFile = fopen(download->path.c_str(), "wb");
+        curl_easy_setopt(transfer, CURLOPT_WRITEFUNCTION, BWrite);
+        curl_easy_setopt(transfer, CURLOPT_WRITEDATA, download->bFile);
+    } else if (download->downloadType == DownloadType::Text) {
+        download->tFile = new std::ofstream();
+        download->tFile->open(download->path.c_str());
+        curl_easy_setopt(transfer, CURLOPT_WRITEFUNCTION, TWrite);
+        curl_easy_setopt(transfer, CURLOPT_WRITEDATA, download->tFile);
+    }
+
     curl_easy_setopt(transfer, CURLOPT_URL, download->url.c_str());
-    curl_easy_setopt(transfer, CURLOPT_WRITEDATA, download->file);
     Progress* p = download->progress;
     curl_easy_setopt(transfer, CURLOPT_PROGRESSDATA, p);
     curl_easy_setopt(transfer, CURLOPT_PROGRESSFUNCTION, xferinfo);
@@ -72,7 +76,12 @@ bool Downloader::Update() {
     return 1;
 }
 
-size_t Downloader::Write(void *ptr, size_t size, size_t nmemb, void *stream) {
+size_t Downloader::BWrite(void *ptr, size_t size, size_t nmemb, void *stream) {
+    size_t written = fwrite(ptr, size, nmemb, (FILE*) stream);
+    return size * nmemb;
+}
+
+size_t Downloader::TWrite(void *ptr, size_t size, size_t nmemb, void *stream) {
     std::string data = (char*) ptr;
     std::ofstream* file = (std::ofstream*) stream;
     (*file) << data;

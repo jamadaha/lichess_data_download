@@ -38,9 +38,11 @@ int main(int argc, char** argv) {
     Downloader downloader = Downloader();
     for (int i = rangedDownloads.size() - 1; i >= 0; i--) {
         Download download = rangedDownloads[i];
-        downloader.AddDownload(download.link, result["p"].as<std::string>() + "/Downloads/" + std::to_string(download.year) + "-" + std::to_string(download.month) + ".pgn.bz2");
-    }
-    using namespace indicators;
+        downloader.AddDownload(download.link, 
+        result["p"].as<std::string>() + "/Downloads/" + std::to_string(download.year) + "-" + std::to_string(download.month) + ".pgn.bz2", 
+        DownloadType::Binary);
+    }    using namespace indicators;
+
 
     while (downloader.LoadNextDownload()) {
         std::cout << Utilities::BoldOn << "Downloading " << Utilities::BoldOff << downloader.GetDownloadLink() << std::endl;
@@ -63,5 +65,6 @@ int main(int argc, char** argv) {
     }
     Downloader::Clean();
     std::cout << Utilities::BoldOn << "----FINISHED DOWNLOAD----" << Utilities::BoldOff << std::endl;
+    //system("");
     return 0;
 }
