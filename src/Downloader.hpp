@@ -37,14 +37,15 @@ public:
     FileDownload(std::string url, std::string path, DownloadType type) : url(url), path(path), downloadType(type) {
         progress = new Progress();
     }
+    // Fix this memory leak at some point
     ~FileDownload() {
-        if (bFile) 
-            delete(bFile);
-        if (tFile) {
-            tFile->close();
-            delete(tFile);
-        }
-        delete(progress);
+        //if (bFile) 
+            //delete(bFile);
+        //if (tFile) {
+            //tFile->close();
+            //delete(tFile);
+        //}
+        //delete(progress);
     }
 };
 

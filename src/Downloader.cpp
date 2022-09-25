@@ -65,7 +65,6 @@ bool Downloader::Update() {
             CURL *e = msg->easy_handle;
             curl_multi_remove_handle(multiHandle, e);
             curl_easy_cleanup(e);
-            delete(downloads[0]);
             downloads.erase(downloads.begin());
             return 0;
         }
