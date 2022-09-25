@@ -19,25 +19,27 @@ void Downloader::Clean() {
 
 void Downloader::AddDownload(std::string url, std::string path) {
     AddDir(path);
-    downloads.push_back(Download(url, path));
+    downloads.emplace(downloads.end(), new FileDownload(url, path));
 }
 
 double Downloader::GetDownloadProgress() {
-    return downloads[0].progress->progressPercent;
+    return downloads[0]->progress->progressPercent;
 }
 
 bool Downloader::LoadNextDownload() {
     if (downloads.size() == 0)
         return false;
-    Download download = downloads[0];
+    FileDownload *download = downloads[0];
 
-    FILE* file = fopen(download.path.c_str(), "wb");
-    download.file = file;
+    download->file = new std::ofstream;
+
+    download->file->open(download->path.c_str());//= fopen64(download.path.c_str(), "wb");
+    
     CURL *transfer = curl_easy_init();
     curl_easy_setopt(transfer, CURLOPT_WRITEFUNCTION, Write);
-    curl_easy_setopt(transfer, CURLOPT_URL, download.url.c_str());
-    curl_easy_setopt(transfer, CURLOPT_WRITEDATA, file);
-    Progress* p = download.progress;
+    curl_easy_setopt(transfer, CURLOPT_URL, download->url.c_str());
+    curl_easy_setopt(transfer, CURLOPT_WRITEDATA, download->file);
+    Progress* p = download->progress;
     curl_easy_setopt(transfer, CURLOPT_PROGRESSDATA, p);
     curl_easy_setopt(transfer, CURLOPT_PROGRESSFUNCTION, xferinfo);
     curl_easy_setopt(transfer, CURLOPT_NOPROGRESS, false);
@@ -55,6 +57,7 @@ bool Downloader::Update() {
             CURL *e = msg->easy_handle;
             curl_multi_remove_handle(multiHandle, e);
             curl_easy_cleanup(e);
+            delete(downloads[0]);
             downloads.erase(downloads.begin());
             return 0;
         }
@@ -66,8 +69,10 @@ bool Downloader::Update() {
 }
 
 size_t Downloader::Write(void *ptr, size_t size, size_t nmemb, void *stream) {
-    size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
-    return written;
+    std::string data = (char*) ptr;
+    std::ofstream* file = (std::ofstream*) stream;
+    (*file) << data;
+    return size * nmemb;
 }
 
 int Downloader::xferinfo(void *p, double dltotal, double dlnow, double ultotal, double ulnow) {

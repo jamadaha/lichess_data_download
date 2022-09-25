@@ -4,6 +4,7 @@
 #include "include/cxxopts/cxxopts.hpp"
 #include "include/indicators/indicators.hpp"
 #include "src/Downloader.hpp"
+#include "src/DownloadParser.hpp"
 
 
 int main(int argc, char** argv) {
@@ -19,11 +20,10 @@ int main(int argc, char** argv) {
     auto result = options.parse(argc, argv);
 
     Downloader::Init();
-    Downloader downloader = Downloader();
-    downloader.AddDownload("https://database.lichess.org/standard/list.txt", result["p"].as<std::string>() + "/download_list.txt");
-    downloader.AddDownload("https://database.lichess.org/standard/lichess_db_standard_rated_2015-06.pgn.bz2", result["p"].as<std::string>() + "/2015-06.txt");
     
-    using namespace indicators;
+    DownloadParser::GetDownloads(result["p"].as<std::string>());
+
+/*    using namespace indicators;
 
     while (downloader.LoadNextDownload()) {
         printf("Beginning Download...\n");
@@ -44,7 +44,8 @@ int main(int argc, char** argv) {
         }
         bar.set_progress(100);
         printf("Finished Download\n");
-    }
+    }*/
     Downloader::Clean();
+
     return 0;
 }

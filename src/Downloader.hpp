@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <unordered_set>
 #include <algorithm>
+#include <memory>
 
 #define MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL     3000000
 
@@ -20,15 +21,19 @@ struct Progress {
     }
 };
 
-struct Download {
+struct FileDownload {
 public:
     std::string url;
     std::string path;
-    FILE *file;
+    std::ofstream *file;
     Progress *progress;
-    Download(){};
-    Download(std::string url, std::string path) : url(url), path(path){
+    FileDownload(std::string url, std::string path) : url(url), path(path){
         progress = new Progress();
+    }
+    ~FileDownload() {
+        file->close();
+        delete(file);
+        delete(progress);
     }
 };
 
@@ -44,7 +49,7 @@ public:
     bool Update();
 
 private:
-    std::vector<Download> downloads;
+    std::vector<FileDownload*> downloads;
     CURLM* multiHandle;
     static size_t Write(void *ptr, size_t size, size_t nmemb, void *stream);
     static int xferinfo(void *ptr, double dltotal, double dlnow, double ultotal, double ulnow);
