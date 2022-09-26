@@ -6,6 +6,8 @@ Downloader::Downloader() {
 }
 
 Downloader::~Downloader() {
+    for (auto download : finishedDownloads)
+        delete(download);
     curl_multi_cleanup(multiHandle);
 }
 
@@ -65,6 +67,7 @@ bool Downloader::Update() {
             CURL *e = msg->easy_handle;
             curl_multi_remove_handle(multiHandle, e);
             curl_easy_cleanup(e);
+            finishedDownloads.push_back(downloads[0]);
             downloads.erase(downloads.begin());
             return 0;
         }

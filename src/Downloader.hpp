@@ -39,13 +39,13 @@ public:
     }
     // Fix this memory leak at some point
     ~FileDownload() {
-        //if (bFile) 
-            //delete(bFile);
-        //if (tFile) {
-            //tFile->close();
-            //delete(tFile);
-        //}
-        //delete(progress);
+        if (bFile)
+            fclose(bFile);
+        if (tFile) {
+            tFile->close();
+            delete(tFile);
+        }
+        delete(progress);
     }
 };
 
@@ -63,6 +63,7 @@ public:
 
 private:
     std::vector<FileDownload*> downloads;
+    std::vector<FileDownload*> finishedDownloads;
     CURLM* multiHandle;
     static size_t TWrite(void *ptr, size_t size, size_t nmemb, void *stream);
     static size_t BWrite(void *ptr, size_t size, size_t nmemb, void *stream);
