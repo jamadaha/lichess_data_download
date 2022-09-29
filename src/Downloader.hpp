@@ -19,25 +19,17 @@ enum class DownloadType {
     Binary
 };
 
-struct Progress {
-    double progressPercent;
-    Progress(){
-        progressPercent = 0;
-    }
-};
-
 struct FileDownload {
 public:
     std::string url;
     std::string path;
     FILE *bFile = nullptr;
     std::ofstream *tFile = nullptr;
-    Progress *progress;
+    double *progress;
     DownloadType downloadType;
     FileDownload(std::string url, std::string path, DownloadType type) : url(url), path(path), downloadType(type) {
-        progress = new Progress();
+        progress = new double;
     }
-    // Fix this memory leak at some point
     ~FileDownload() {
         if (bFile)
             fclose(bFile);

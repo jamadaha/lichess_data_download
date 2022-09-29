@@ -25,7 +25,7 @@ void Downloader::AddDownload(std::string url, std::string path, DownloadType dow
 }
 
 double Downloader::GetDownloadProgress() {
-    return downloads[0]->progress->progressPercent;
+    return *downloads[0]->progress;
 }
 
 std::string Downloader::GetDownloadLink() {
@@ -49,8 +49,7 @@ bool Downloader::LoadNextDownload() {
     }
 
     curl_easy_setopt(transfer, CURLOPT_URL, download->url.c_str());
-    Progress* p = download->progress;
-    curl_easy_setopt(transfer, CURLOPT_PROGRESSDATA, p);
+    curl_easy_setopt(transfer, CURLOPT_PROGRESSDATA, download->progress);
     curl_easy_setopt(transfer, CURLOPT_PROGRESSFUNCTION, xferinfo);
     curl_easy_setopt(transfer, CURLOPT_NOPROGRESS, false);
     curl_multi_add_handle(multiHandle, transfer);
@@ -91,11 +90,11 @@ size_t Downloader::TWrite(void *ptr, size_t size, size_t nmemb, void *stream) {
 }
 
 int Downloader::xferinfo(void *p, double dltotal, double dlnow, double ultotal, double ulnow) {
-    struct Progress *progress = (struct Progress*) p;
+    double *progress = (double*) p;
 
     if (dltotal > 0.1 && dlnow > 0.1) {
         double newProgress = dlnow / dltotal;
-        (*progress).progressPercent = newProgress;
+        (*progress) = newProgress;
     }
     return 0;
 }
