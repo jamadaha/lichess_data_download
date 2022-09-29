@@ -3,13 +3,14 @@
 
 #include <iostream>
 
-namespace Utilities {
-    std::ostream& BoldOn(std::ostream& os)
+class Utilities {
+public:
+    static std::ostream& BoldOn(std::ostream& os)
     {
         return os << "\e[1m";
     }
 
-    std::ostream& BoldOff(std::ostream& os)
+    static std::ostream& BoldOff(std::ostream& os)
     {
         return os << "\e[0m";
     }
