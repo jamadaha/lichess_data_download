@@ -3,43 +3,29 @@
 #include <unistd.h>
 #include <chrono>
 #include <thread>
-#include "include/cxxopts/cxxopts.hpp"
+#include <stdlib.h>
+
 #include "include/indicators/indicators.hpp"
 #include "src/Downloader.hpp"
 #include "src/DownloadParser.hpp"
 #include "src/Utilities.hpp"
-
-cxxopts::ParseResult GetOptions(int argc, char** argv) {
-    cxxopts::Options options("LichessToDB", "Downloads Lichess data, extracts it, then inserts into local Postgres instance");
-
-    options.add_options()
-        ("h,help", "Print usage")
-        ("p,path", "Temporary path for download and extraction", cxxopts::value<std::string>()->default_value("./Temp"))
-        ("r,range", "Download all months within the spcified range", cxxopts::value<std::string>()->default_value("01/2013-02/2013"))
-        ("e,extract", "Extract downloaded files", cxxopts::value<int>()->default_value("1"))
-    ;
-
-    auto result = options.parse(argc, argv);
-
-    if (result.count("help")) {
-        std::cout << options.help() << std::endl; exit(0);
-    }
-    return result;
-}
+#include "src/ArgumentHandler.hpp"
 
 int main(int argc, char** argv) {
-    auto result = GetOptions(argc, argv);
+    ArgumentHandler aH;
+    int isHelp = aH.GetOptions(argc, argv);
+    if (isHelp) std::exit(0);
 
     std::cout << Utilities::BoldOn << "----BEGINNING DOWNLOAD----" << Utilities::BoldOff << std::endl;
     Downloader::Init();
     
-    std::vector<Download> allDownloads = DownloadParser::GetDownloads(result["p"].as<std::string>());
-    std::vector<Download> rangedDownloads = DownloadParser::GetRange(allDownloads, result["r"].as<std::string>());
+    std::vector<Download> allDownloads = DownloadParser::GetDownloads(aH.tempPath);
+    std::vector<Download> rangedDownloads = DownloadParser::GetRange(allDownloads, aH.range);
     Downloader downloader = Downloader();
     for (int i = rangedDownloads.size() - 1; i >= 0; i--) {
         Download download = rangedDownloads[i];
         downloader.AddDownload(download.link, 
-        result["p"].as<std::string>() + "/Downloads/" + std::to_string(download.year) + "-" + std::to_string(download.month) + ".pgn.bz2", 
+        aH.downloadPath + std::to_string(download.year) + "-" + std::to_string(download.month) + ".pgn.bz2", 
         DownloadType::Binary);
     }    using namespace indicators;
 
@@ -64,7 +50,7 @@ int main(int argc, char** argv) {
         bar.set_progress(100);
     }
     Downloader::Clean();
-    std::cout << Utilities::BoldOn << "----FINISHED DOWNLOAD----" << Utilities::BoldOff << std::endl;
-    //system("");
+    std::cout << Utilities::BoldOn << "----FINISHED  DOWNLOAD----" << Utilities::BoldOff << std::endl;
+    
     return 0;
 }
