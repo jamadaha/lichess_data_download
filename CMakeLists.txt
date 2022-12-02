@@ -14,6 +14,7 @@ add_executable(LichessToDB main.cpp
 "include/indicators/indicators.hpp"
 "src/Download.hpp"
 "src/Downloader.cpp"
+"src/DownloadManager.cpp"
 "src/DownloadParser.hpp"
 "src/Utilities.hpp")
 
