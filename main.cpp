@@ -5,15 +5,12 @@
 #include <thread>
 #include <stdlib.h>
 
-#include "src/ArgumentHandler.hpp"
+#include "src/ArgumentParser.hpp"
 #include "src/DownloadManager.hpp"
 
 int main(int argc, char** argv) {
-    ArgumentHandler aH;
-    int isHelp = aH.GetOptions(argc, argv);
-    if (isHelp) std::exit(0);
-
-    DownloadManager dM = DownloadManager(aH.tempPath, aH.downloadPath, aH.range);
+    Arguments args = ArgumentParser::Parse(argc, argv);
+    DownloadManager dM = DownloadManager(args.tempPath, args.downloadPath, args.range);
     dM.Begin();
     
     return 0;
