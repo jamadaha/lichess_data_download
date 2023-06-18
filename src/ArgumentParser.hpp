@@ -26,7 +26,7 @@ struct ArgumentParser {
             ("h,help", "Print usage")
             ("p,path", "Temporary path for download and extraction", cxxopts::value<std::string>()->default_value("./Temp"))
             ("r,range", "Download all months within the spcified range", cxxopts::value<std::string>()->default_value("01/2013-01/2013"))
-            ("e,extract", "Extract downloaded files", cxxopts::value<int>()->default_value("1"))
+            ("e,extract", "Extract downloaded files", cxxopts::value<bool>()->default_value("1"))
         ;
 
         auto result = options.parse(argc, argv);
