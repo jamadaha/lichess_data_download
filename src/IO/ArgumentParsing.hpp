@@ -2,7 +2,9 @@
 #define ARGUMENT_HANDLER
 
 #include <string>
-#include "../include/cxxopts/cxxopts.hpp"
+#include "doctest/doctest.h"
+#include "cxxopts/cxxopts.hpp"
+
 
 struct Arguments {
     const std::string tempPath;
@@ -12,19 +14,20 @@ struct Arguments {
     const bool extract;
     Arguments(std::string path, std::string range, bool extract) : 
         tempPath(path),
-        downloadPath(path + "/Downloads/"),
-        extractPath(path + "/Extracts/"),
+        downloadPath(path + "/downloads/"),
+        extractPath(path + "/extracts/"),
         range(range),
         extract(extract) {}
 };
 
-struct ArgumentParser {
+namespace ArgumentParsing {
     static Arguments Parse(int argc, char** argv) {
         cxxopts::Options options("LichessToDB", "Downloads Lichess data, extracts it, then inserts into local Postgres instance");
 
         options.add_options()
             ("h,help", "Print usage")
-            ("p,path", "Temporary path for download and extraction", cxxopts::value<std::string>()->default_value("./Temp"))
+            ("t,test", "Runs test")
+            ("p,path", "Temporary path for download and extraction", cxxopts::value<std::string>()->default_value("./temp"))
             ("r,range", "Download all months within the spcified range", cxxopts::value<std::string>()->default_value("01/2013-01/2013"))
             ("e,extract", "Extract downloaded files", cxxopts::value<bool>()->default_value("1"))
         ;
@@ -34,6 +37,11 @@ struct ArgumentParser {
         if (result.count("help")) {
             std::cout << options.help() << std::endl; 
             exit(0);
+        } else if (result.count("test")) {
+            doctest::Context context;
+            context.setOption("order-by", "name");
+            int res = context.run();
+            exit(res);
         }
 
         try {

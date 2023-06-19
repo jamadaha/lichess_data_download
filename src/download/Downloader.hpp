@@ -11,6 +11,7 @@
 #include <unordered_set>
 #include <algorithm>
 #include <memory>
+#include <vector>
 
 #define MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL     3000000
 
