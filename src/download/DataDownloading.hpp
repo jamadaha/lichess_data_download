@@ -33,13 +33,13 @@ namespace DataDownloading {
         DownloadList availableFiles = DownloadFileAvailablity(downloader, tempPath, range);
         AddFileDownloads(downloader, availableFiles, downloadPath);
    
-        auto bar = Utilities::GenerateProgressBar();
         while (downloader.LoadNextDownload()) {
             std::cout << Utilities::BoldOn << "Downloading " << Utilities::BoldOff << downloader.GetDownloadLink() << std::endl;
+            auto bar = Utilities::GenerateProgressBar();
             while (downloader.Update()) {
                 double progress = downloader.GetDownloadProgress();
                 bar.set_progress(downloader.GetDownloadProgress() * 100);
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
             bar.set_progress(100);
         }
