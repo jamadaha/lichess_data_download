@@ -21,7 +21,7 @@ namespace DataDownloading {
     static void AddFileDownloads(Downloader &downloader, DownloadList &downloads, std::string downloadPath) {
         for (auto download : downloads)
             downloader.AddDownload(download.link, 
-                                   downloadPath + std::to_string(download.year) + '-' + std::to_string(download.month), 
+                                   downloadPath + std::to_string(download.year) + '-' + std::to_string(download.month) + ".zst", 
                                    DownloadType::Binary);
     }
 
