@@ -52,6 +52,7 @@ public:
     bool LoadNextDownload();
     double GetDownloadProgress();
     std::string GetDownloadLink();
+    std::string GetDownloadPath();
     bool Update();
 
 private:

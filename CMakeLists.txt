@@ -14,12 +14,17 @@ add_executable(LichessToDB src/main.cpp
 "third_party/cxxopts/cxxopts.hpp"
 "third_party/indicators/indicators.hpp"
 "third_party/doctest/doctest.h"
-"src/IO/ArgumentParsing.hpp"
+"src/ArgumentParsing.hpp"
 "src/download/types/Download.hpp"
 "src/download/types/DownloadList.hpp"
 "src/download/DataDownloading.hpp"
 "src/download/Downloader.cpp"
 "src/download/DownloadParsing.hpp"
+"src/parsing/types/MatchType.hpp"
+"src/parsing/types/MatchResult.hpp"
+"src/parsing/types/MatchInfo.hpp"
+"src/parsing/types/MatchTermination.hpp"
+"src/parsing/MatchParsing.hpp"
 "src/Utilities.hpp")
 
 target_link_libraries(LichessToDB ${CURL_LIBRARIES})
