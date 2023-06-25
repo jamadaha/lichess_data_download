@@ -24,6 +24,7 @@ add_executable(LichessToDB src/main.cpp
 "src/parsing/types/MatchResult.hpp"
 "src/parsing/types/MatchInfo.hpp"
 "src/parsing/types/MatchTermination.hpp"
+"src/parsing/MatchParsing.hpp"
 "src/Utilities.hpp")
 
 target_link_libraries(LichessToDB ${CURL_LIBRARIES})

@@ -15,6 +15,7 @@
 
 #include "ArgumentParsing.hpp"
 #include "download/DataDownloading.hpp"
+#include "parsing/MatchParsing.hpp"
 
 int main(int argc, char** argv) {
     Arguments args = ArgumentParsing::Parse(argc, argv);

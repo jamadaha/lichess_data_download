@@ -8,15 +8,36 @@
 
 struct MatchInfo {
     MatchType type;
-    std::string url;
+    std::string site;
     std::string whitePlayer;
     std::string blackPlayer;
     MatchResult result;
     std::string date;
     std::string time;
-    uint whiteELO;
-    uint blackELO;
+    uint whiteElo;
+    uint blackElo;
     MatchTermination termination;
+    MatchInfo(
+            MatchType type, 
+            std::string site, 
+            std::string whitePlayer, 
+            std::string blackPlayer,
+            MatchResult result,
+            std::string date,
+            std::string time,
+            uint whiteElo,
+            uint blackElo,
+            MatchTermination termination) :
+        type(type),
+        site(site),
+        whitePlayer(whitePlayer),
+        blackPlayer(blackPlayer),
+        result(result),
+        date(date),
+        time(time),
+        whiteElo(whiteElo),
+        blackElo(blackElo),
+        termination(termination) {}
 };
 
 #endif
