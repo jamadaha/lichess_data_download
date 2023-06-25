@@ -2,6 +2,7 @@
 #define MATCH_INFO
 
 #include <string>
+#include <optional>
 #include "MatchType.hpp"
 #include "MatchResult.hpp"
 #include "MatchTermination.hpp"
@@ -14,8 +15,8 @@ struct MatchInfo {
     MatchResult result;
     std::string date;
     std::string time;
-    uint whiteElo;
-    uint blackElo;
+    std::optional<uint> whiteElo;
+    std::optional<uint> blackElo;
     MatchTermination termination;
     MatchInfo(
             MatchType type, 
@@ -25,8 +26,8 @@ struct MatchInfo {
             MatchResult result,
             std::string date,
             std::string time,
-            uint whiteElo,
-            uint blackElo,
+            std::optional<uint> whiteElo,
+            std::optional<uint> blackElo,
             MatchTermination termination) :
         type(type),
         site(site),

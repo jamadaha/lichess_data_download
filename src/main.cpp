@@ -1,3 +1,4 @@
+#include "parsing/types/MatchInfo.hpp"
 #include <exception>
 #include <iostream>
 #include <stdexcept>
@@ -30,13 +31,32 @@ int main(int argc, char** argv) {
             continue;
         printf("Extracting %s\n", entryPath.c_str());
 
-        const uint BUFFER_LIMIT = 4096;
-        char buffer[BUFFER_LIMIT]{' '};
+        const uint BUFFER_LIMIT = 16384;
+        char buffers[40][BUFFER_LIMIT];
+        uint index = 0;
         FILE *stream = popen(std::string("zstdcat ").append(entryPath).c_str(), "r");
-        if (stream == NULL)
+        if (stream == nullptr)
             throw std::logic_error("Unable to open file");
-        while(fgets(buffer, BUFFER_LIMIT, stream) != NULL) {
+        while(fgets(buffers[index++], BUFFER_LIMIT, stream) != nullptr) {
+            if (index > 0 && buffers[index - 1][0] == '1') {
+                std::vector<std::string> lines;
+                for (uint i = 0; i < index; ++i)
+                    if (buffers[i][0] != '\n')
+                        lines.push_back(buffers[i]);
+
+                std::optional<MatchInfo> info;
+                try {
+                    info = MatchParsing::ParseMatch(lines);
+                } catch (const std::exception& ex) {
+                    printf("%s\n", ex.what());
+                    exit(1);
+                } catch (...) {
+                    printf("Unhandled exception\n");
+                }
+                index = 0;
+            }
         }
+        printf("Finished Extraction\n");
         pclose(stream);
     }
     

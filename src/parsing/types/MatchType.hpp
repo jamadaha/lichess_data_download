@@ -5,7 +5,8 @@ enum class MatchType {
     Bullet,
     Blitz,
     Rapid,
-    Classical
+    Classical,
+    Correspondence
 };
 
 #endif
