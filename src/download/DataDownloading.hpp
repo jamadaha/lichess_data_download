@@ -47,6 +47,7 @@ namespace DataDownloading {
         AddFileDownloads(downloader, availableFiles, downloadPath);
    
         while (downloader.LoadNextDownload()) {
+            auto filePath = downloader.GetDownloadPath();
             std::cout << Utilities::BoldOn << "Downloading " << Utilities::BoldOff << downloader.GetDownloadLink() << std::endl;
             auto bar = Utilities::GenerateProgressBar();
             while (downloader.Update()) {
@@ -54,10 +55,9 @@ namespace DataDownloading {
                 bar.set_progress(downloader.GetDownloadProgress() * 100);
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
-            auto path = downloader.GetDownloadPath();
             // Remove .temp extension
-            auto newPath = path.substr(0, path.size() - 5);
-            std::rename(path.c_str(), newPath.c_str());
+            auto newPath = filePath.substr(0, filePath.size() - 5);
+            std::rename(filePath.c_str(), newPath.c_str());
             bar.set_progress(100);
         }
     
