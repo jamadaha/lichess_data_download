@@ -32,6 +32,10 @@ std::string Downloader::GetDownloadLink() {
     return downloads[0]->url;
 }
 
+std::string Downloader::GetDownloadPath() {
+    return downloads[0]->path;
+}
+
 bool Downloader::LoadNextDownload() {
     if (downloads.size() == 0)
         return false;

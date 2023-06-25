@@ -18,10 +18,22 @@ namespace DataDownloading {
         return DownloadParsing::ParseDownloadFile(listPath).GetRange(range);
     }
 
+    // Removes those from downloads which are already present at downloadPath
+    static void FilterDownloaded(std::string downloadPath, DownloadList &downloads) {
+        const auto path(downloadPath);
+        for (const auto &entry : std::filesystem::directory_iterator(path)) {
+            const auto entryPath = entry.path().string();
+            const auto fileName = entryPath.substr(entryPath.find_last_of("/\\") + 1);
+            if (fileName.find(".temp") != std::string::npos)
+                continue;
+            downloads.RemoveDownload(fileName);
+        }
+    }
+
     static void AddFileDownloads(Downloader &downloader, DownloadList &downloads, std::string downloadPath) {
         for (auto download : downloads)
             downloader.AddDownload(download.link, 
-                                   downloadPath + std::to_string(download.year) + '-' + std::to_string(download.month) + ".zst", 
+                                   downloadPath + download.fileName + ".temp", 
                                    DownloadType::Binary);
     }
 
@@ -31,6 +43,7 @@ namespace DataDownloading {
         downloader.Init();
 
         DownloadList availableFiles = DownloadFileAvailablity(downloader, tempPath, range);
+        FilterDownloaded(downloadPath, availableFiles);
         AddFileDownloads(downloader, availableFiles, downloadPath);
    
         while (downloader.LoadNextDownload()) {
@@ -41,6 +54,10 @@ namespace DataDownloading {
                 bar.set_progress(downloader.GetDownloadProgress() * 100);
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
+            auto path = downloader.GetDownloadPath();
+            // Remove .temp extension
+            auto newPath = path.substr(0, path.size() - 5);
+            std::rename(path.c_str(), newPath.c_str());
             bar.set_progress(100);
         }
     

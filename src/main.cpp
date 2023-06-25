@@ -24,6 +24,9 @@ int main(int argc, char** argv) {
     const std::filesystem::path downloadPath(args.downloadPath);
     for (const auto &entry : std::filesystem::directory_iterator(downloadPath)) {
         const auto entryPath = entry.path();
+        // Ignore unfinished downloads
+        if (entryPath.filename().string().find(".temp") != std::string::npos)
+            continue;
         printf("Extracting %s\n", entryPath.c_str());
 
         const uint BUFFER_LIMIT = 4096;
@@ -32,7 +35,6 @@ int main(int argc, char** argv) {
         if (stream == NULL)
             throw std::logic_error("Unable to open file");
         while(fgets(buffer, BUFFER_LIMIT, stream) != NULL) {
-            printf("%s", buffer);
         }
         pclose(stream);
     }

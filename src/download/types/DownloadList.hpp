@@ -34,6 +34,16 @@ struct DownloadList : public std::vector<Download> {
                         std::atoi(range.substr(11, 15).c_str()), 
                         std::atoi(range.substr(8, 10).c_str()));
     }
+
+    // Removes downloads with filename equal to the given filename
+    void RemoveDownload(std::string fileName) {
+        for (auto iter = this->begin(); iter != this->end();) {
+            if (iter->fileName == fileName)
+                iter = this->erase(iter);
+            else
+                ++iter;
+        }
+    }
 };
 
 TEST_CASE("GetRange") {
