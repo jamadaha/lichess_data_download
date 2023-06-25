@@ -4,7 +4,8 @@
 enum class MatchResult {
     WhiteWin,
     BlackWin,
-    Draw
+    Draw,
+    Unfinished
 };
 
 #endif

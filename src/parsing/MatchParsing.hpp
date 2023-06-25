@@ -44,6 +44,8 @@ namespace MatchParsing {
             return MatchResult::BlackWin;
         if (line == "1/2-1/2")
             return MatchResult::Draw;
+        if (line == "*")
+            return MatchResult::Unfinished;
         throw std::invalid_argument("Unexpected match result: " + line);
     }
 
@@ -63,22 +65,50 @@ namespace MatchParsing {
             return MatchTermination::Normal;
         if (line == "time forfeit")
             return MatchTermination::TimeForfeit;
+        if (line == "abandoned")
+            return MatchTermination::Abandoned;
+        if (line == "rules infraction")
+            return MatchTermination::RulesInfraction;
+        if (line == "unterminated")
+            return MatchTermination::Unterminated;
         throw std::invalid_argument("Unexpected match termination: " + line);
     }
 
     static MatchInfo ParseMatch(std::vector<std::string> lines) {
-        const MatchType matchType = ParseMatchType(lines[0]);
-        const std::string site = ParseGeneric(lines[1]);
-        const std::string whitePlayer = ParseGeneric(lines[2]);
-        const std::string blackPlayer = ParseGeneric(lines[3]);
-        const MatchResult matchResult = ParseMatchResult(lines[4]);
-        const std::string date = ParseGeneric(lines[5]);
-        const std::string time = ParseGeneric(lines[6]);
-        const std::optional<uint> whiteElo = ParseElo(lines[7]);
-        const std::optional<uint> blackElo = ParseElo(lines[8]);
-        const MatchTermination termination = ParseMatchTermination(lines[lines.size() - 2]);
-        return MatchInfo(matchType, site, whitePlayer, blackPlayer, 
-                matchResult, date, time, whiteElo, blackElo, termination);
+        std::optional<MatchType> matchType;
+        std::optional<std::string> site;
+        std::optional<std::string> whitePlayer;
+        std::optional<std::string> blackPlayer;
+        std::optional<MatchResult> matchResult;
+        std::optional<std::string> date;
+        std::optional<std::string> time;
+        std::optional<uint> whiteElo;
+        std::optional<uint> blackElo;
+        std::optional<MatchTermination> matchTermination;
+        for (auto line : lines) {
+            if (line.find("[Event") != std::string::npos)
+                matchType = ParseMatchType(line);
+            else if (line.find("[Site") != std::string::npos)
+                site = ParseGeneric(line);
+            else if (line.find("[White ") != std::string::npos)
+                whitePlayer = ParseGeneric(line);
+            else if (line.find("[Black ") != std::string::npos)
+                blackPlayer = ParseGeneric(line);
+            else if (line.find("[Result") != std::string::npos)
+                matchResult = ParseMatchResult(line);
+            else if (line.find("[UTCDate") != std::string::npos)
+                date = ParseGeneric(line);
+            else if (line.find("[UTCTime") != std::string::npos)
+                time = ParseGeneric(line);
+            else if (line.find("[WhiteElo") != std::string::npos)
+                whiteElo = ParseElo(line);
+            else if (line.find("[BlackElo") != std::string::npos)
+                blackElo = ParseElo(line);
+            else if (line.find("[Termination") != std::string::npos)
+                matchTermination = ParseMatchTermination(line);
+        }
+        return MatchInfo(matchType.value(), site.value(), whitePlayer.value(), blackPlayer.value(), 
+                matchResult.value(), date.value(), time.value(), whiteElo, blackElo, matchTermination.value());
     }
 
     namespace Test {

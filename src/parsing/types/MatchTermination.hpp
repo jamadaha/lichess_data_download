@@ -3,7 +3,10 @@
 
 enum class MatchTermination {
     Normal,
-    TimeForfeit
+    TimeForfeit,
+    Abandoned,
+    RulesInfraction,
+    Unterminated
 };
 
 #endif

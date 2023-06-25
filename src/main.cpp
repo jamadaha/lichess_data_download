@@ -38,12 +38,13 @@ int main(int argc, char** argv) {
         if (stream == nullptr)
             throw std::logic_error("Unable to open file");
         while(fgets(buffers[index++], BUFFER_LIMIT, stream) != nullptr) {
-            if (index > 0 && buffers[index - 1][0] == '1') {
+            if (index > 0 && 
+                    (buffers[index - 1][0] == '1' || buffers[index - 1][0] == '0' ||
+                     buffers[index-1][0] == ' ')) {
                 std::vector<std::string> lines;
                 for (uint i = 0; i < index; ++i)
                     if (buffers[i][0] != '\n')
                         lines.push_back(buffers[i]);
-
                 std::optional<MatchInfo> info;
                 try {
                     info = MatchParsing::ParseMatch(lines);
