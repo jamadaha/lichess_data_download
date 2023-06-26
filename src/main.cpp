@@ -23,13 +23,15 @@ int main(int argc, char** argv) {
 
     DataDownloading::DownloadData(args.tempPath, args.downloadPath, args.range);
         
+    std::cout << Utilities::BoldOn << "----BEGINNING EXTRACTION----" << Utilities::BoldOff << std::endl;
+    
     const std::filesystem::path downloadPath(args.downloadPath);
     for (const auto &entry : std::filesystem::directory_iterator(downloadPath)) {
         const auto entryPath = entry.path();
         // Ignore unfinished downloads
         if (entryPath.filename().string().find(".temp") != std::string::npos)
             continue;
-        printf("Extracting %s\n", entryPath.c_str());
+        std::cout << Utilities::BoldOn << "Extracting " << Utilities::BoldOff << entryPath.filename() << std::endl;
 
         const uint BUFFER_LIMIT = 16384;
         char buffers[40][BUFFER_LIMIT];
@@ -45,22 +47,14 @@ int main(int argc, char** argv) {
                 for (uint i = 0; i < index; ++i)
                     if (buffers[i][0] != '\n')
                         lines.push_back(buffers[i]);
-                std::optional<MatchInfo> info;
-                try {
-                    info = MatchParsing::ParseMatch(lines);
-                } catch (const std::exception& ex) {
-                    printf("%s\n", ex.what());
-                    exit(1);
-                } catch (...) {
-                    printf("Unhandled exception\n");
-                }
+                MatchInfo info = MatchParsing::ParseMatch(lines);
                 index = 0;
             }
         }
-        printf("Finished Extraction\n");
         pclose(stream);
     }
     
+    std::cout << Utilities::BoldOn << "----FINISHED  EXTRACTION----" << Utilities::BoldOff << std::endl;
 
     return 0;
 }
