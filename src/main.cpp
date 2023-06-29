@@ -24,6 +24,8 @@ int main(int argc, char** argv) {
     Arguments args = ArgumentParsing::Parse(argc, argv);
 
     DataDownloading::DownloadData(args.tempPath, args.downloadPath, args.range);
+    if (!args.extract)
+        exit(0);
         
     std::cout << Utilities::BoldOn << "----BEGINNING EXTRACTION----" << Utilities::BoldOff << std::endl;
     pqxx::connection conn("host=" + args.host + " port=" + args.port + " dbname=" + args.dbName + " password=" + args.password);
@@ -62,13 +64,13 @@ int main(int argc, char** argv) {
             }
         }
         pclose(stream);
-        tx.commit();
 
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         const auto timeTaken = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
         std::cout << "Inserted " << gameCount << " games in " << timeTaken << "ms (" << gameCount / timeTaken << " games/ms)" << std::endl;
     }
     
+    tx.commit();
     std::cout << Utilities::BoldOn << "----FINISHED  EXTRACTION----" << Utilities::BoldOff << std::endl;
 
     return 0;
