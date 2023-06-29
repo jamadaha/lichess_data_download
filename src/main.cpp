@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <filesystem>
 #include <stdio.h>
+#include <pqxx/pqxx>
 
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest/doctest.h"
@@ -25,6 +26,9 @@ int main(int argc, char** argv) {
     DataDownloading::DownloadData(args.tempPath, args.downloadPath, args.range);
         
     std::cout << Utilities::BoldOn << "----BEGINNING EXTRACTION----" << Utilities::BoldOff << std::endl;
+    pqxx::connection conn("host=" + args.host + " port=" + args.port + " dbname=" + args.dbName + " password=" + args.password);
+    std::cout << "Connected to " << conn.dbname() << std::endl;
+    pqxx::work tx(conn);
     
     const std::filesystem::path downloadPath(args.downloadPath);
     for (const auto &entry : std::filesystem::directory_iterator(downloadPath)) {
@@ -51,11 +55,14 @@ int main(int argc, char** argv) {
                     if (buffers[i][0] != '\n')
                         lines.push_back(buffers[i]);
                 MatchInfo info = MatchParsing::ParseMatch(lines);
+                tx.exec0("INSERT INTO \"games\"(white_player, black_player) VALUES ('" + info.whitePlayer + "', '" + info.blackPlayer + "');");
+
                 index = 0;
                 ++gameCount;
             }
         }
         pclose(stream);
+        tx.commit();
 
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         const auto timeTaken = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
