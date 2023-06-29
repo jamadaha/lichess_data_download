@@ -1,4 +1,5 @@
 #include "parsing/types/MatchInfo.hpp"
+#include <cstdint>
 #include <exception>
 #include <iostream>
 #include <stdexcept>
@@ -33,6 +34,8 @@ int main(int argc, char** argv) {
             continue;
         std::cout << Utilities::BoldOn << "Extracting " << Utilities::BoldOff << entryPath.filename() << std::endl;
 
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        uint64_t gameCount = 0;
         const uint BUFFER_LIMIT = 16384;
         char buffers[40][BUFFER_LIMIT];
         uint index = 0;
@@ -49,9 +52,14 @@ int main(int argc, char** argv) {
                         lines.push_back(buffers[i]);
                 MatchInfo info = MatchParsing::ParseMatch(lines);
                 index = 0;
+                ++gameCount;
             }
         }
         pclose(stream);
+
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        const auto timeTaken = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+        std::cout << "Inserted " << gameCount << " games in " << timeTaken << "ms (" << gameCount / timeTaken << " games/ms)" << std::endl;
     }
     
     std::cout << Utilities::BoldOn << "----FINISHED  EXTRACTION----" << Utilities::BoldOff << std::endl;
