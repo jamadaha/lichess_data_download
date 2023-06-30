@@ -18,6 +18,7 @@ struct MatchInfo {
     std::optional<uint> whiteElo;
     std::optional<uint> blackElo;
     MatchTermination termination;
+    std::string moves;
     MatchInfo(
             MatchType type, 
             std::string site, 
@@ -28,7 +29,8 @@ struct MatchInfo {
             std::string time,
             std::optional<uint> whiteElo,
             std::optional<uint> blackElo,
-            MatchTermination termination) :
+            MatchTermination termination,
+            std::string moves) :
         type(type),
         site(site),
         whitePlayer(whitePlayer),
@@ -38,7 +40,8 @@ struct MatchInfo {
         time(time),
         whiteElo(whiteElo),
         blackElo(blackElo),
-        termination(termination) {}
+        termination(termination),
+        moves(moves){}
 };
 
 #endif

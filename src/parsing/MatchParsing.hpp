@@ -90,6 +90,24 @@ namespace MatchParsing {
         throw std::invalid_argument("Unexpected match termination: " + line);
     }
 
+    static std::string ParseMoves(std::string line) {
+        if (line[line.size() - 1] == '\n')
+            line = line.substr(0, line.size() - 1);
+
+        // Remove {} and the what's inside
+        for (std::string::size_type commentIndex; (commentIndex = line.find('{')) != std::string::npos;) {
+            std::string::size_type commentEnd = line.find('}');
+            uint commentSize = commentEnd - commentIndex;
+            line = line.erase(commentIndex - 1, commentSize + 2);
+        }
+
+        // Remove 1... or similar
+        for (std::string::size_type tripDot; (tripDot = line.find("...")) != std::string::npos;)
+            line = line.erase(tripDot - 1, 5);
+
+        return line;
+    }
+
     static MatchInfo ParseMatch(std::vector<std::string> lines) {
         std::optional<MatchType> matchType;
         std::optional<std::string> site;
@@ -101,6 +119,7 @@ namespace MatchParsing {
         std::optional<uint> whiteElo;
         std::optional<uint> blackElo;
         std::optional<MatchTermination> matchTermination;
+        std::optional<std::string> moves;
         for (auto line : lines) {
             if (line.find("[Event") != std::string::npos)
                 matchType = ParseMatchType(line);
@@ -122,6 +141,8 @@ namespace MatchParsing {
                 blackElo = ParseElo(line);
             else if (line.find("[Termination") != std::string::npos)
                 matchTermination = ParseMatchTermination(line);
+            else if (line[0] != '[')
+                moves = ParseMoves(line);
         }
         assert(matchType.has_value());
         assert(site.has_value());
@@ -129,8 +150,10 @@ namespace MatchParsing {
         assert(time.has_value());
         assert(matchTermination.has_value());
         assert(matchResult.has_value());
+        assert(moves.has_value());
         return MatchInfo(matchType.value(), site.value(), whitePlayer, blackPlayer, 
-                matchResult.value(), date.value(), time.value(), whiteElo, blackElo, matchTermination.value());
+                matchResult.value(), date.value(), time.value(), whiteElo, blackElo, matchTermination.value(),
+                moves.value());
     }
 
     namespace Test {
@@ -230,6 +253,29 @@ namespace MatchParsing {
             }
         }
 
+        TEST_CASE("ParseMoves") {
+            SUBCASE("Single Move") {
+                std::string line = "1. e4";
+                std::string moves = ParseMoves(line);
+                CHECK_EQ("1. e4", moves);
+            }
+            SUBCASE("Single Move with Newline") {
+                std::string line = "1. e4\n";
+                std::string moves = ParseMoves(line);
+                CHECK_EQ("1. e4", moves);
+            }
+            SUBCASE("Multiple Moves") {
+                std::string line = "1. e4 e5";
+                std::string moves = ParseMoves(line);
+                CHECK_EQ("1. e4 e5", moves);
+            }
+            SUBCASE("Comment Removal") {
+                std::string line = "1. e4 {test} 1... e5";
+                std::string moves = ParseMoves(line);
+                CHECK_EQ("1. e4 e5", moves);
+            }
+        }
+
         TEST_CASE("ParseMatch") {
             SUBCASE("WithDiff") {
                 std::vector<std::string> lines {
@@ -248,7 +294,7 @@ namespace MatchParsing {
                     "[Opening \"Nimzo-Larsen Attack\"]",
                     "[TimeControl \"0+1\"]",
                     "[Termination \"Normal\"]",
-                    "1. b3 e6 2. Bb2 Qe7 3. g4 g6 4. Bxh8 f6 5. g5 b6 6. gxf6 Nxf6 7. Bxf6 Qxf6 8. Nc3 Bb7 9. f3 c6 10. Bg2 Na6 11. e4 Nc7 12. Qe2 O-O-O 13. O-O-O Ba6 14. d3 Qxc3 15. Rd2 Qa1# 0-1"
+                    "1. e4"
                 };
                 MatchInfo matchInfo = ParseMatch(lines);
                 CHECK_EQ(MatchType::Bullet, matchInfo.type);
@@ -260,6 +306,7 @@ namespace MatchParsing {
                 CHECK_EQ(1663, matchInfo.whiteElo.value());
                 CHECK_EQ(1635, matchInfo.blackElo.value());
                 CHECK_EQ(MatchTermination::Normal, matchInfo.termination);
+                CHECK_EQ("1. e4", matchInfo.moves);
             }
             SUBCASE("WithoutDiff") {
                 std::vector<std::string> lines {
@@ -276,7 +323,7 @@ namespace MatchParsing {
                     "[Opening \"Nimzo-Larsen Attack\"]",
                     "[TimeControl \"0+1\"]",
                     "[Termination \"Normal\"]",
-                    "1. b3 e6 2. Bb2 Qe7 3. g4 g6 4. Bxh8 f6 5. g5 b6 6. gxf6 Nxf6 7. Bxf6 Qxf6 8. Nc3 Bb7 9. f3 c6 10. Bg2 Na6 11. e4 Nc7 12. Qe2 O-O-O 13. O-O-O Ba6 14. d3 Qxc3 15. Rd2 Qa1# 0-1"
+                    "1. e4"
                 };
                 MatchInfo matchInfo = ParseMatch(lines);
                 CHECK_EQ(MatchType::Bullet, matchInfo.type);
@@ -288,6 +335,7 @@ namespace MatchParsing {
                 CHECK(!matchInfo.whiteElo.has_value());
                 CHECK_EQ(1635, matchInfo.blackElo);
                 CHECK_EQ(MatchTermination::Normal, matchInfo.termination);
+                CHECK_EQ("1. e4", matchInfo.moves);
             }
         }
     }

@@ -26,6 +26,7 @@ namespace SQLInsertBuilding {
             cols.push_back({"white_elo", std::to_string(match.whiteElo.value())});
         if (match.blackElo.has_value())
             cols.push_back({"black_elo", std::to_string(match.blackElo.value())});
+        cols.push_back({"moves", match.moves});
 
         statement += "(";
 
@@ -51,20 +52,20 @@ namespace SQLInsertBuilding {
     namespace Test {
         TEST_CASE("GenerateMatchInsert") {
             SUBCASE("MinCase") {
-                MatchInfo match{MatchType::Blitz, "testSite", {}, {}, MatchResult::Unfinished, "2013-01-01", "00:00:00", {}, {}, MatchTermination::Unterminated};
+                MatchInfo match{MatchType::Blitz, "testSite", {}, {}, MatchResult::Unfinished, "2013-01-01", "00:00:00", {}, {}, MatchTermination::Unterminated, "1. e4"};
                 std::string tableName = "table";
                 std::string statement = GenerateMatchInsert(match, tableName);
-                CHECK_EQ("INSERT INTO \"table\"(site,date,time,match_type,match_termination) VALUES "
-                         "('testSite','2013-01-01','00:00:00','Unfinished','Unterminated');", statement);
+                CHECK_EQ("INSERT INTO \"table\"(site,date,time,match_type,match_termination,moves) VALUES "
+                         "('testSite','2013-01-01','00:00:00','Unfinished','Unterminated','1. e4');", statement);
             }
             SUBCASE("FullCase") {
-                MatchInfo match{MatchType::Blitz, "testSite", "A", "B", MatchResult::Unfinished, "2013-01-01", "00:00:00", 0, 1, MatchTermination::Unterminated};
+                MatchInfo match{MatchType::Blitz, "testSite", "A", "B", MatchResult::Unfinished, "2013-01-01", "00:00:00", 0, 1, MatchTermination::Unterminated, "1. e4"};
                 std::string tableName = "table";
                 std::string statement = GenerateMatchInsert(match, tableName);
                 CHECK_EQ("INSERT INTO \"table\""
-                         "(site,date,time,match_type,match_termination,white_player,black_player,white_elo,black_elo)"
+                         "(site,date,time,match_type,match_termination,white_player,black_player,white_elo,black_elo,moves)"
                          " VALUES "
-                         "('testSite','2013-01-01','00:00:00','Unfinished','Unterminated','A','B','0','1');", statement);
+                         "('testSite','2013-01-01','00:00:00','Unfinished','Unterminated','A','B','0','1','1. e4');", statement);
             }
         }
     }

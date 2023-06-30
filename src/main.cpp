@@ -38,6 +38,8 @@ int main(int argc, char** argv) {
 
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         uint64_t gameCount = 0;
+        // Arbitrary limit
+        // 16k is not enough in some games, and buffer overflows are annoying
         const uint BUFFER_LIMIT = 100000;
         char buffers[40][BUFFER_LIMIT];
         uint index = 0;
