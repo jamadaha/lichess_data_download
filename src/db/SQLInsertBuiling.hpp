@@ -16,6 +16,8 @@ namespace SQLInsertBuilding {
         cols.push_back({"site", match.site});
         cols.push_back({"date", match.date});
         cols.push_back({"time", match.time});
+        cols.push_back({"match_type", MatchResults[(uint) match.result]});
+        cols.push_back({"match_termination", MatchTerminations[(uint) match.termination]});
         if (match.whitePlayer.has_value())
             cols.push_back({"white_player", match.whitePlayer.value()});
         if (match.blackPlayer.has_value())
