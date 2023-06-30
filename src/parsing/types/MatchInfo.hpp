@@ -10,8 +10,8 @@
 struct MatchInfo {
     MatchType type;
     std::string site;
-    std::string whitePlayer;
-    std::string blackPlayer;
+    std::optional<std::string> whitePlayer;
+    std::optional<std::string> blackPlayer;
     MatchResult result;
     std::string date;
     std::string time;
@@ -21,8 +21,8 @@ struct MatchInfo {
     MatchInfo(
             MatchType type, 
             std::string site, 
-            std::string whitePlayer, 
-            std::string blackPlayer,
+            std::optional<std::string> whitePlayer, 
+            std::optional<std::string> blackPlayer,
             MatchResult result,
             std::string date,
             std::string time,

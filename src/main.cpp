@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <filesystem>
 #include <stdio.h>
-#include <pqxx/pqxx>
 
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest/doctest.h"
@@ -19,19 +18,16 @@
 #include "ArgumentParsing.hpp"
 #include "download/DataDownloading.hpp"
 #include "parsing/MatchParsing.hpp"
+#include "db/postgres/PostgresConnection.hpp"
 
 int main(int argc, char** argv) {
     Arguments args = ArgumentParsing::Parse(argc, argv);
 
     DataDownloading::DownloadData(args.tempPath, args.downloadPath, args.range);
-    if (!args.extract)
-        exit(0);
         
     std::cout << Utilities::BoldOn << "----BEGINNING EXTRACTION----" << Utilities::BoldOff << std::endl;
-    pqxx::connection conn("host=" + args.host + " port=" + args.port + " dbname=" + args.dbName + " password=" + args.password);
-    std::cout << "Connected to " << conn.dbname() << std::endl;
-    pqxx::work tx(conn);
-    
+    PostgresConnection conn{args.host, args.port, args.dbName, args.password};
+
     const std::filesystem::path downloadPath(args.downloadPath);
     for (const auto &entry : std::filesystem::directory_iterator(downloadPath)) {
         const auto entryPath = entry.path();
@@ -48,6 +44,8 @@ int main(int argc, char** argv) {
         FILE *stream = popen(std::string("zstdcat ").append(entryPath).c_str(), "r");
         if (stream == nullptr)
             throw std::logic_error("Unable to open file");
+
+        conn.BeginTransaction();
         while(fgets(buffers[index++], BUFFER_LIMIT, stream) != nullptr) {
             if (index > 0 && 
                     (buffers[index - 1][0] == '1' || buffers[index - 1][0] == '0' ||
@@ -56,21 +54,21 @@ int main(int argc, char** argv) {
                 for (uint i = 0; i < index; ++i)
                     if (buffers[i][0] != '\n')
                         lines.push_back(buffers[i]);
-                MatchInfo info = MatchParsing::ParseMatch(lines);
-                tx.exec0("INSERT INTO \"games\"(white_player, black_player) VALUES ('" + info.whitePlayer + "', '" + info.blackPlayer + "');");
+                MatchInfo match = MatchParsing::ParseMatch(lines);
+                conn.InsertMatch(match);
 
                 index = 0;
                 ++gameCount;
             }
         }
         pclose(stream);
+        conn.CommitTransaction();
 
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
         const auto timeTaken = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
         std::cout << "Inserted " << gameCount << " games in " << timeTaken << "ms (" << gameCount / timeTaken << " games/ms)" << std::endl;
     }
-    
-    tx.commit();
+   
     std::cout << Utilities::BoldOn << "----FINISHED  EXTRACTION----" << Utilities::BoldOff << std::endl;
 
     return 0;

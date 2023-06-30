@@ -27,6 +27,10 @@ add_executable(LichessToDB src/main.cpp
 "src/parsing/types/MatchInfo.hpp"
 "src/parsing/types/MatchTermination.hpp"
 "src/parsing/MatchParsing.hpp"
+"src/db/DBConnection.hpp"
+"src/db/SQLInsertBuiling.hpp"
+"src/db/postgres/PostgresConnection.hpp"
+"src/db/postgres/PostgresConnection.cpp"
 "src/Utilities.hpp")
 
 target_link_libraries(LichessToDB ${CURL_LIBRARIES} pqxx)
