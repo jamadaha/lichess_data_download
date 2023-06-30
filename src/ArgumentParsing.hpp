@@ -11,13 +11,19 @@ struct Arguments {
     const std::string downloadPath;
     const std::string extractPath;
     const std::string range;
-    const bool extract;
-    Arguments(std::string path, std::string range, bool extract) : 
+    const std::string host;
+    const std::string port;
+    const std::string dbName;
+    const std::string password;
+    Arguments(std::string path, std::string range, std::string host, std::string port, std::string dbName, std::string password) : 
         tempPath(path),
         downloadPath(path + "/downloads/"),
         extractPath(path + "/extracts/"),
         range(range),
-        extract(extract) {}
+        host(host),
+        port(port),
+        dbName(dbName),
+        password(password){}
 };
 
 namespace ArgumentParsing {
@@ -29,7 +35,10 @@ namespace ArgumentParsing {
             ("t,test", "Runs test")
             ("p,path", "Temporary path for download and extraction", cxxopts::value<std::string>()->default_value("./temp"))
             ("r,range", "Download all months within the spcified range", cxxopts::value<std::string>()->default_value("01/2013-01/2013"))
-            ("e,extract", "Extract downloaded files", cxxopts::value<bool>()->default_value("1"))
+            ("host", "Host of DB connection", cxxopts::value<std::string>()->default_value("localhost"))
+            ("port", "Port of DB connection", cxxopts::value<std::string>()->default_value("5432"))
+            ("db_name", "Name of DB", cxxopts::value<std::string>()->default_value("chess_data"))
+            ("password", "Password for DB connection", cxxopts::value<std::string>()->default_value("password"))
         ;
 
         auto result = options.parse(argc, argv);
@@ -48,7 +57,10 @@ namespace ArgumentParsing {
             return Arguments(
                     result["p"].as<std::string>(),
                     result["r"].as<std::string>(),
-                    result["e"].as<bool>()
+                    result["host"].as<std::string>(),
+                    result["port"].as<std::string>(),
+                    result["db_name"].as<std::string>(),
+                    result["password"].as<std::string>()
                     );
         } catch (const cxxopts::missing_argument_exception &e) {
             printf("\nMissing argument: %s\n", e.what());

@@ -10,6 +10,8 @@ enable_testing()
 find_package(CURL REQUIRED)
 include_directories(${CURL_INCLUDE_DIR})
 
+add_subdirectory(third_party/libpqxx build-pqxx)
+
 add_executable(LichessToDB src/main.cpp
 "third_party/cxxopts/cxxopts.hpp"
 "third_party/indicators/indicators.hpp"
@@ -25,9 +27,13 @@ add_executable(LichessToDB src/main.cpp
 "src/parsing/types/MatchInfo.hpp"
 "src/parsing/types/MatchTermination.hpp"
 "src/parsing/MatchParsing.hpp"
+"src/db/DBConnection.hpp"
+"src/db/SQLInsertBuiling.hpp"
+"src/db/postgres/PostgresConnection.hpp"
+"src/db/postgres/PostgresConnection.cpp"
 "src/Utilities.hpp")
 
-target_link_libraries(LichessToDB ${CURL_LIBRARIES})
+target_link_libraries(LichessToDB ${CURL_LIBRARIES} pqxx)
 target_include_directories(LichessToDB PRIVATE src third_party)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

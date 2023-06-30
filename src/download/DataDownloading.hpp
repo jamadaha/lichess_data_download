@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <string>
 #include <thread>
 #include "indicators/indicators.hpp"
@@ -21,6 +22,8 @@ namespace DataDownloading {
     // Removes those from downloads which are already present at downloadPath
     static void FilterDownloaded(std::string downloadPath, DownloadList &downloads) {
         const auto path(downloadPath);
+        if (!std::filesystem::exists(downloadPath))
+            return;
         for (const auto &entry : std::filesystem::directory_iterator(path)) {
             const auto entryPath = entry.path().string();
             const auto fileName = entryPath.substr(entryPath.find_last_of("/\\") + 1);

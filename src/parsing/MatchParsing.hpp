@@ -2,6 +2,7 @@
 #define MATCH_PARSING
 
 #include <algorithm>
+#include <cassert>
 #include <cctype>
 #include <stdexcept>
 #include <vector>
@@ -20,6 +21,19 @@ namespace MatchParsing {
         return line.substr(firstQuote, diff);
     }
 
+    static std::string ParseSite(std::string line) {
+        auto site = ParseGeneric(line);
+        uint idIndex = site.find_last_of('/') + 1;
+        return site.substr(idIndex, site.size() - idIndex);
+    }
+
+    static std::optional<std::string> ParseUsername(std::string line) {
+        auto username = ParseGeneric(line);
+        if (username == "?")
+            return std::optional<std::string>();
+        return username;
+    }
+
     static MatchType ParseMatchType(std::string line) {
         std::transform(line.begin(), line.end(), line.begin(),
                 [](char c){ return std::tolower(c); });
@@ -33,6 +47,8 @@ namespace MatchParsing {
             return MatchType::Classical;
         if (line.find("correspondence") != std::string::npos)
             return MatchType::Correspondence;
+        if (line.find("standard") != std::string::npos)
+            return MatchType::Standard;
         throw std::invalid_argument("Unexpected match type: " + line);
     }
 
@@ -52,7 +68,7 @@ namespace MatchParsing {
     static std::optional<uint> ParseElo(std::string line) {
         line = ParseGeneric(line);
         if (line == "?")
-            return {};
+            return std::optional<uint>();
         else
             return std::atoi(line.c_str());
     }
@@ -89,11 +105,11 @@ namespace MatchParsing {
             if (line.find("[Event") != std::string::npos)
                 matchType = ParseMatchType(line);
             else if (line.find("[Site") != std::string::npos)
-                site = ParseGeneric(line);
+                site = ParseSite(line);
             else if (line.find("[White ") != std::string::npos)
-                whitePlayer = ParseGeneric(line);
+                whitePlayer = ParseUsername(line);
             else if (line.find("[Black ") != std::string::npos)
-                blackPlayer = ParseGeneric(line);
+                blackPlayer = ParseUsername(line);
             else if (line.find("[Result") != std::string::npos)
                 matchResult = ParseMatchResult(line);
             else if (line.find("[UTCDate") != std::string::npos)
@@ -107,27 +123,38 @@ namespace MatchParsing {
             else if (line.find("[Termination") != std::string::npos)
                 matchTermination = ParseMatchTermination(line);
         }
-        return MatchInfo(matchType.value(), site.value(), whitePlayer.value(), blackPlayer.value(), 
+        assert(matchType.has_value());
+        assert(site.has_value());
+        assert(date.has_value());
+        assert(time.has_value());
+        assert(matchTermination.has_value());
+        assert(matchResult.has_value());
+        return MatchInfo(matchType.value(), site.value(), whitePlayer, blackPlayer, 
                 matchResult.value(), date.value(), time.value(), whiteElo, blackElo, matchTermination.value());
     }
 
     namespace Test {
         TEST_CASE("ParseSite") {
             std::string line = "[Site \"https://lichess.org/ri7h2cf8\"]";
-            std::string parsedSite = ParseGeneric(line);
-            CHECK_EQ("https://lichess.org/ri7h2cf8", parsedSite);
+            std::string parsedSite = ParseSite(line);
+            CHECK_EQ("ri7h2cf8", parsedSite);
         }
 
         TEST_CASE("ParsePlayer") {
             SUBCASE("ParseWhite") {
                 std::string line = "[White \"White\"]";
-                std::string player = ParseGeneric(line);
+                std::optional<std::string> player = ParseUsername(line);
                 CHECK_EQ("White", player);
             }
             SUBCASE("ParseBlack") {
                 std::string line = "[Black \"Black\"]";
-                std::string player = ParseGeneric(line);
+                std::optional<std::string> player = ParseUsername(line);
                 CHECK_EQ("Black", player);
+            }
+            SUBCASE("ParseUnknown") {
+                std::string line = "[White \"?\"]";
+                std::optional<std::string> player = ParseUsername(line);
+                CHECK(!player.has_value());
             }
         }
 
@@ -225,13 +252,13 @@ namespace MatchParsing {
                 };
                 MatchInfo matchInfo = ParseMatch(lines);
                 CHECK_EQ(MatchType::Bullet, matchInfo.type);
-                CHECK_EQ("https://lichess.org/ri7h2cf8", matchInfo.site);
-                CHECK_EQ("WhitePlayer", matchInfo.whitePlayer);
-                CHECK_EQ("BlackPlayer", matchInfo.blackPlayer);
+                CHECK_EQ("ri7h2cf8", matchInfo.site);
+                CHECK_EQ("WhitePlayer", matchInfo.whitePlayer.value());
+                CHECK_EQ("BlackPlayer", matchInfo.blackPlayer.value());
                 CHECK_EQ("2013.04.30", matchInfo.date);
                 CHECK_EQ("22:00:07", matchInfo.time);
-                CHECK_EQ(1663, matchInfo.whiteElo);
-                CHECK_EQ(1635, matchInfo.blackElo);
+                CHECK_EQ(1663, matchInfo.whiteElo.value());
+                CHECK_EQ(1635, matchInfo.blackElo.value());
                 CHECK_EQ(MatchTermination::Normal, matchInfo.termination);
             }
             SUBCASE("WithoutDiff") {
@@ -253,9 +280,9 @@ namespace MatchParsing {
                 };
                 MatchInfo matchInfo = ParseMatch(lines);
                 CHECK_EQ(MatchType::Bullet, matchInfo.type);
-                CHECK_EQ("https://lichess.org/ri7h2cf8", matchInfo.site);
-                CHECK_EQ("?", matchInfo.whitePlayer);
-                CHECK_EQ("BlackPlayer", matchInfo.blackPlayer);
+                CHECK_EQ("ri7h2cf8", matchInfo.site);
+                CHECK(!matchInfo.whitePlayer.has_value());
+                CHECK_EQ("BlackPlayer", matchInfo.blackPlayer.value());
                 CHECK_EQ("2013.04.30", matchInfo.date);
                 CHECK_EQ("22:00:07", matchInfo.time);
                 CHECK(!matchInfo.whiteElo.has_value());
