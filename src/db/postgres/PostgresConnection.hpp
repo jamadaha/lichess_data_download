@@ -7,6 +7,7 @@
 
 class PostgresConnection : public DBConnection {
 public:
+    PostgresConnection() = delete;
     PostgresConnection(std::string host, std::string port, std::string dbName, std::string password);
     ~PostgresConnection();
     void BeginTransaction() final;

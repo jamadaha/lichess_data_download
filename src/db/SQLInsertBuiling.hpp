@@ -54,7 +54,8 @@ namespace SQLInsertBuilding {
                 MatchInfo match{MatchType::Blitz, "testSite", {}, {}, MatchResult::Unfinished, "2013-01-01", "00:00:00", {}, {}, MatchTermination::Unterminated};
                 std::string tableName = "table";
                 std::string statement = GenerateMatchInsert(match, tableName);
-                CHECK_EQ("", statement);
+                CHECK_EQ("INSERT INTO \"table\"(site,date,time,match_type,match_termination) VALUES "
+                         "('testSite','2013-01-01','00:00:00','Unfinished','Unterminated');", statement);
             }
         }
     }
