@@ -7,36 +7,92 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(CTest)
 enable_testing()
 
+###############################################################################
+# CURL
+###############################################################################
+
 find_package(CURL REQUIRED)
 include_directories(${CURL_INCLUDE_DIR})
 
+###############################################################################
+# PQXX
+###############################################################################
+
 add_subdirectory(third_party/libpqxx build-pqxx)
 
-add_executable(LichessToDB src/main.cpp
-"third_party/cxxopts/cxxopts.hpp"
-"third_party/indicators/indicators.hpp"
-"third_party/doctest/doctest.h"
-"src/ArgumentParsing.hpp"
-"src/download/types/Download.hpp"
-"src/download/types/DownloadList.hpp"
-"src/download/DataDownloading.hpp"
-"src/download/Downloader.cpp"
-"src/download/DownloadParsing.hpp"
-"src/parsing/types/MatchType.hpp"
-"src/parsing/types/MatchResult.hpp"
-"src/parsing/types/MatchInfo.hpp"
-"src/parsing/types/MatchTermination.hpp"
-"src/parsing/MatchParsing.hpp"
-"src/db/DBConnection.hpp"
-"src/db/SQLInsertBuiling.hpp"
-"src/db/postgres/PostgresConnection.hpp"
-"src/db/postgres/PostgresConnection.cpp"
-"src/Utilities.hpp")
+###############################################################################
+# Download
+###############################################################################
+
+set(DOWNLOAD_HEADERS
+        "src/download/types/Download.hpp"
+        "src/download/types/DownloadList.hpp"
+        "src/download/DataDownloading.hpp"
+        "src/download/DownloadParsing.hpp"
+    )
+
+set(DOWNLOAD_SRC
+        "src/download/Downloader.cpp"
+    )
+
+set(DOWNLOAD ${DOWNLOAD_HEADERS} ${DOWNLOAD_SRC})
+
+###############################################################################
+# PGN Parsing
+###############################################################################
+
+set(PGN_PARSING_HEADERS
+        "src/pgn_parsing/types/MatchType.hpp"
+        "src/pgn_parsing/types/MatchResult.hpp"
+        "src/pgn_parsing/types/MatchInfo.hpp"
+        "src/pgn_parsing/types/MatchTermination.hpp"
+        "src/pgn_parsing/MatchParsing.hpp"
+    )
+
+set(PGN_PARSING_SRC
+    )
+
+set(PGN_PARSING ${PGN_PARSING_HEADERS} ${PGN_PARSING_SRC})
+
+###############################################################################
+# Database Connection
+###############################################################################
+
+set(DB_HEADERS
+        "src/db/DBConnection.hpp"
+        "src/db/SQLInsertBuiling.hpp"
+        "src/db/postgres/PostgresConnection.hpp"
+    )
+
+set(DB_SRC
+        "src/db/postgres/PostgresConnection.cpp"
+    )
+
+set(DB ${DB_HEADERS} ${DB_SRC})
+
+###############################################################################
+# Shared Include
+###############################################################################
+
+set(SHARED_INCLUDE
+        ${DOWNLOAD}
+        ${PGN_PARSING}
+        "third_party/cxxopts/cxxopts.hpp"
+        "third_party/indicators/indicators.hpp"
+        "third_party/doctest/doctest.h"
+        "src/Utilities.hpp"
+    )
+
+###############################################################################
+# LichessToDB
+###############################################################################
+
+add_executable(LichessToDB 
+    src/bin/LichessToDB/LichessToDB.cpp
+    "src/bin/LichessToDB/ArgumentParsing.hpp"
+    ${SHARED_INCLUDE}
+    ${DB})
 
 target_link_libraries(LichessToDB ${CURL_LIBRARIES} pqxx)
 target_include_directories(LichessToDB PRIVATE src third_party)
-
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
 

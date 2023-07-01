@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 #include "doctest/doctest.h"
-#include "parsing/types/MatchInfo.hpp"
-#include "parsing/types/MatchResult.hpp"
-#include "parsing/types/MatchTermination.hpp"
+#include "pgn_parsing/types/MatchInfo.hpp"
+#include "pgn_parsing/types/MatchResult.hpp"
+#include "pgn_parsing/types/MatchTermination.hpp"
 
 namespace SQLInsertBuilding {
     static std::string GenerateMatchInsert(const MatchInfo &match, const std::string &table) {

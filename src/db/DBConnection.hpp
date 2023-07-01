@@ -2,7 +2,7 @@
 #define DB_CONNECTION
 
 #include <string>
-#include "parsing/types/MatchInfo.hpp"
+#include "pgn_parsing/types/MatchInfo.hpp"
 
 class DBConnection {
 public:

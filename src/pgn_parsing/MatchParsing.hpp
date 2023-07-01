@@ -8,8 +8,8 @@
 #include <vector>
 #include <string>
 #include "doctest/doctest.h"
-#include "parsing/types/MatchResult.hpp"
-#include "parsing/types/MatchTermination.hpp"
+#include "types/MatchResult.hpp"
+#include "types/MatchTermination.hpp"
 #include "types/MatchInfo.hpp"
 #include "types/MatchType.hpp"
 

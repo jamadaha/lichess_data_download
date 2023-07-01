@@ -1,4 +1,3 @@
-#include "parsing/types/MatchInfo.hpp"
 #include <cstdint>
 #include <exception>
 #include <iostream>
@@ -17,7 +16,8 @@
 
 #include "ArgumentParsing.hpp"
 #include "download/DataDownloading.hpp"
-#include "parsing/MatchParsing.hpp"
+#include "pgn_parsing/MatchParsing.hpp"
+#include "pgn_parsing/types/MatchInfo.hpp"
 #include "db/postgres/PostgresConnection.hpp"
 
 int main(int argc, char** argv) {
