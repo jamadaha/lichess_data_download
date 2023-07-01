@@ -13,21 +13,20 @@
 #include "utilities/CommandLineUtilities.hpp"
 #include "utilities/FileUtilities.hpp"
 #include "extraction/FileExtraction.hpp"
-#include "db/postgres/PostgresConnection.hpp"
 
 int main(int argc, char** argv) {
     Arguments args = ArgumentParsing::Parse(argc, argv);
 
     DataDownloading::DownloadData(args.tempPath, args.downloadPath, args.range);
-  
-    PostgresConnection conn{args.host, args.port, args.dbName, args.password};
+    
+    std::ofstream oFile(args.csvPath);
+    oFile << "outcome,moves" << std::endl;
     Utilities::DirIterator(args.downloadPath, "zst", [&](std::string filePath){
-        conn.BeginTransaction();
         FileExtraction::ExtractPGNFile(filePath, [&](MatchInfo match){
-            conn.InsertMatch(match);
+            oFile << MatchResults[(uint) match.result] << "," << match.moves << std::endl;
         });
-        conn.CommitTransaction();
     });
+    oFile.close();
    
     return 0;
 }

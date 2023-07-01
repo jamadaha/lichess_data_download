@@ -55,6 +55,19 @@ set(PGN_PARSING_SRC
 set(PGN_PARSING ${PGN_PARSING_HEADERS} ${PGN_PARSING_SRC})
 
 ###############################################################################
+# Extraction
+###############################################################################
+
+set(EXTRACTION_HEADERS
+    "src/extraction/FileExtraction.hpp"
+    )
+
+set(EXTRACTION_SRC
+    )
+
+set(EXTRACTION ${EXTRACTION_HEADERS} ${EXTRACTION_SRC})
+
+###############################################################################
 # Database Connection
 ###############################################################################
 
@@ -77,11 +90,25 @@ set(DB ${DB_HEADERS} ${DB_SRC})
 set(SHARED_INCLUDE
         ${DOWNLOAD}
         ${PGN_PARSING}
+        ${EXTRACTION}
         "third_party/cxxopts/cxxopts.hpp"
         "third_party/indicators/indicators.hpp"
         "third_party/doctest/doctest.h"
         "src/Utilities.hpp"
     )
+
+###############################################################################
+# LichessToCSV
+###############################################################################
+
+add_executable(LichessToCSV 
+    src/bin/LichessToCSV/LichessToCSV.cpp
+    "src/bin/LichessToCSV/ArgumentParsing.hpp"
+    ${SHARED_INCLUDE}
+    )
+
+target_link_libraries(LichessToCSV ${CURL_LIBRARIES})
+target_include_directories(LichessToCSV PRIVATE src third_party)
 
 ###############################################################################
 # LichessToDB

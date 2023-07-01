@@ -2,7 +2,7 @@
 #include <string>
 #include <thread>
 #include "indicators/indicators.hpp"
-#include "Utilities.hpp"
+#include "utilities/CommandLineUtilities.hpp"
 #include "types/Download.hpp"
 #include "types/DownloadList.hpp"
 #include "Downloader.hpp"
@@ -41,7 +41,6 @@ namespace DataDownloading {
     }
 
     static void DownloadData(std::string tempPath, std::string downloadPath, std::string range) {
-        std::cout << Utilities::BoldOn << "----BEGINNING DOWNLOAD----" << Utilities::BoldOff << std::endl;
         Downloader downloader = Downloader();
         downloader.Init();
 
@@ -65,7 +64,6 @@ namespace DataDownloading {
         }
     
         downloader.Clean();
-        std::cout << Utilities::BoldOn << "----FINISHED  DOWNLOAD----" << Utilities::BoldOff << std::endl;
     }
 }
 
