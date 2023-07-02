@@ -1,6 +1,7 @@
 #ifndef FILE_EXTRACTOR
 #define FILE_EXTRACTOR
 
+#include <cstdint>
 #include <stdexcept>
 #include <string>
 #include <functional>
@@ -29,6 +30,8 @@ namespace FileExtraction {
     }
 
     static void ExtractPGNFile(std::string filePath, std::function<void(MatchInfo)> matchCallback) {
+        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        uint64_t gameCount = 0;
         bool encounteredNL = false;
         std::vector<std::string> matchLines;
         FileExtraction::ExtractFile(filePath, [&](std::string line){
@@ -38,12 +41,16 @@ namespace FileExtraction {
                 else {
                     MatchInfo match = MatchParsing::ParseMatch(matchLines);
                     matchCallback(match);
+                    ++gameCount;
                     encounteredNL = false;
                     matchLines.clear();
                 }
             }
             matchLines.push_back(line);
         });
+        std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+        const auto timeTaken = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
+        std::cout << "Extracted " << gameCount << " games in " << timeTaken << "ms (" << gameCount / timeTaken << " games/ms)" << std::endl;
     }
 };
 
