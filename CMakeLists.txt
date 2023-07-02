@@ -4,6 +4,8 @@ project(LichessToDB VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include(FetchContent)
+
 include(CTest)
 enable_testing()
 
@@ -18,7 +20,12 @@ include_directories(${CURL_INCLUDE_DIR})
 # PQXX
 ###############################################################################
 
-add_subdirectory(third_party/libpqxx build-pqxx)
+FetchContent_Declare(
+    pqxx
+    GIT_REPOSITORY https://github.com/jtv/libpqxx
+    GIT_TAG 7.7.5
+)
+FetchContent_MakeAvailable(pqxx)
 
 ###############################################################################
 # Download
