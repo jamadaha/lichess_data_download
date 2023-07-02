@@ -94,7 +94,8 @@ set(SHARED_INCLUDE
         "third_party/cxxopts/cxxopts.hpp"
         "third_party/indicators/indicators.hpp"
         "third_party/doctest/doctest.h"
-        "src/Utilities.hpp"
+        "src/utilities/CommandLineUtilities.hpp"
+        "src/utilities/FileUtilities.hpp"
     )
 
 ###############################################################################
