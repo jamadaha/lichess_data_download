@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
     PostgresConnection conn{args.host, args.port, args.dbName, args.password};
     Utilities::DirIterator(args.downloadPath, "zst", [&](std::string filePath){
         conn.BeginTransaction();
-        FileExtraction::ExtractPGNFile(filePath, [&](MatchInfo match){
+        FileExtraction::ExtractPGNFile(filePath, {}, [&](MatchInfo match){
             conn.InsertMatch(match);
         });
         conn.CommitTransaction();

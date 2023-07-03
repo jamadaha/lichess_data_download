@@ -67,9 +67,12 @@ set(PGN_PARSING ${PGN_PARSING_HEADERS} ${PGN_PARSING_SRC})
 
 set(EXTRACTION_HEADERS
     "src/extraction/FileExtraction.hpp"
+    "src/extraction/Filter.hpp"
+    "src/extraction/FilterGeneration.hpp"
     )
 
 set(EXTRACTION_SRC
+    "src/extraction/Filter.cpp"
     )
 
 set(EXTRACTION ${EXTRACTION_HEADERS} ${EXTRACTION_SRC})

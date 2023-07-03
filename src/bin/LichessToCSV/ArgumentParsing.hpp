@@ -11,12 +11,16 @@ struct Arguments {
     const std::string downloadPath;
     const std::string extractPath;
     const std::string csvPath;
-    Arguments(std::string range, std::string tempPath, std::string path) : 
+    const std::optional<uint> minRating;
+    const std::optional<uint> maxRating;
+    Arguments(std::string range, std::string tempPath, std::string path, 
+              std::optional<uint> minRating, std::optional<uint> maxRating) : 
         range(range),
         tempPath(tempPath),
         downloadPath(tempPath + "/downloads/"),
         extractPath(tempPath + "/extracts/"),
-        csvPath(path){}
+        csvPath(path),
+        minRating(minRating), maxRating(maxRating){}
 };
 
 namespace ArgumentParsing {
@@ -29,6 +33,8 @@ namespace ArgumentParsing {
             ("r,range", "Download all months within the spcified range", cxxopts::value<std::string>()->default_value("01/2013-01/2013"))
             ("temp_path", "Temporary path for download and extraction", cxxopts::value<std::string>()->default_value("./temp"))
             ("p,path", "Path for extracted data", cxxopts::value<std::string>()->default_value("./data.csv"))
+            ("min_rating", "Minimum player rating", cxxopts::value<uint>())
+            ("max_rating", "Maximum player rating", cxxopts::value<uint>())
         ;
 
         auto result = options.parse(argc, argv);
@@ -47,7 +53,13 @@ namespace ArgumentParsing {
             return Arguments(
                     result["range"].as<std::string>(),
                     result["temp_path"].as<std::string>(),
-                    result["path"].as<std::string>()
+                    result["path"].as<std::string>(),
+                    result.count("min_rating") ?
+                    result["min_rating"].as<uint>() :
+                    std::optional<uint>(),
+                    result.count("max_rating") ?
+                    result["max_rating"].as<uint>() :
+                    std::optional<uint>()
                     );
         } catch (const cxxopts::missing_argument_exception &e) {
             printf("\nMissing argument: %s\n", e.what());
