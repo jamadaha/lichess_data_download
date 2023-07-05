@@ -17,3 +17,7 @@ bool Filter::MaxRating::operator()(const MatchInfo &match) const {
     return true;
 }
 
+bool Filter::Termination::operator()(const MatchInfo &match) const {
+    return termination == match.termination;
+}
+

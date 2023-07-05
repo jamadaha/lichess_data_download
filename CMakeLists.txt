@@ -68,7 +68,7 @@ set(PGN_PARSING ${PGN_PARSING_HEADERS} ${PGN_PARSING_SRC})
 set(EXTRACTION_HEADERS
     "src/extraction/FileExtraction.hpp"
     "src/extraction/Filter.hpp"
-    "src/extraction/FilterGeneration.hpp"
+    "src/extraction/Filters.hpp"
     )
 
 set(EXTRACTION_SRC
@@ -76,22 +76,6 @@ set(EXTRACTION_SRC
     )
 
 set(EXTRACTION ${EXTRACTION_HEADERS} ${EXTRACTION_SRC})
-
-###############################################################################
-# Database Connection
-###############################################################################
-
-set(DB_HEADERS
-        "src/db/DBConnection.hpp"
-        "src/db/SQLInsertBuiling.hpp"
-        "src/db/postgres/PostgresConnection.hpp"
-    )
-
-set(DB_SRC
-        "src/db/postgres/PostgresConnection.cpp"
-    )
-
-set(DB ${DB_HEADERS} ${DB_SRC})
 
 ###############################################################################
 # Shared Include
@@ -121,16 +105,4 @@ add_executable(LichessToCSV
 target_link_libraries(LichessToCSV ${CURL_LIBRARIES})
 target_include_directories(LichessToCSV PRIVATE src third_party)
 
-###############################################################################
-# LichessToDB
-###############################################################################
-
-add_executable(LichessToDB 
-    src/bin/LichessToDB/LichessToDB.cpp
-    "src/bin/LichessToDB/ArgumentParsing.hpp"
-    ${SHARED_INCLUDE}
-    ${DB})
-
-target_link_libraries(LichessToDB ${CURL_LIBRARIES} pqxx)
-target_include_directories(LichessToDB PRIVATE src third_party)
 

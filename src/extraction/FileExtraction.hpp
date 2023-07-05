@@ -8,7 +8,7 @@
 #include <iostream>
 #include <vector>
 
-#include "Filter.hpp"
+#include "Filters.hpp"
 #include "pgn_parsing/types/MatchInfo.hpp"
 #include "utilities/CommandLineUtilities.hpp"
 #include "pgn_parsing/MatchParsing.hpp"
@@ -31,7 +31,7 @@ namespace FileExtraction {
         pclose(stream);
     }
 
-    static void ExtractPGNFile(std::string filePath, const std::vector<Filter::Filter*> &filters, std::function<void(MatchInfo)> matchCallback) {
+    static void ExtractPGNFile(std::string filePath, const Filters &filters, std::function<void(MatchInfo)> matchCallback) {
         std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
         uint64_t gameCount = 0;
         uint64_t purgedCount = 0;
@@ -46,11 +46,10 @@ namespace FileExtraction {
                     ++gameCount;
                     encounteredNL = false;
                     matchLines.clear();
-                    for (const auto &filter : filters)
-                        if (!(*filter)(match)) {
-                            ++purgedCount;
-                            return;
-                        }
+                    if (!filters(match)) {
+                        ++purgedCount;
+                        return;
+                    }
                     matchCallback(match);
                 }
             }

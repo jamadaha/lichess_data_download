@@ -13,19 +13,17 @@
 #include "utilities/FileUtilities.hpp"
 #include "extraction/FileExtraction.hpp"
 #include "ArgumentParsing.hpp"
-#include "extraction/FilterGeneration.hpp"
 
 int main(int argc, char** argv) {
     Arguments args = ArgumentParsing::Parse(argc, argv);
-    std::vector<Filter::Filter*> filters = FilterGeneration::GenerateFilters(args.minRating, args.maxRating);
 
     DataDownloading::DownloadData(args.tempPath, args.downloadPath, args.range);
     
     std::ofstream oFile(args.csvPath);
     oFile << "outcome,moves" << std::endl;
     Utilities::DirIterator(args.downloadPath, "zst", [&](std::string filePath){
-        FileExtraction::ExtractPGNFile(filePath, filters, [&](MatchInfo match){
-            oFile << MatchResults[(uint) match.result] << "," << match.moves << std::endl;
+        FileExtraction::ExtractPGNFile(filePath, args.filters, [&](MatchInfo match){
+            oFile << (uint) match.result << "," << match.moves << std::endl;
         });
     });
     oFile.close();

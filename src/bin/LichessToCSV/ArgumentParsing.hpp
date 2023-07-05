@@ -4,6 +4,8 @@
 #include <string>
 #include "doctest/doctest.h"
 #include "cxxopts/cxxopts.hpp"
+#include "extraction/Filters.hpp"
+#include "pgn_parsing/types/MatchTermination.hpp"
 
 struct Arguments {
     const std::string range;
@@ -11,16 +13,14 @@ struct Arguments {
     const std::string downloadPath;
     const std::string extractPath;
     const std::string csvPath;
-    const std::optional<uint> minRating;
-    const std::optional<uint> maxRating;
-    Arguments(std::string range, std::string tempPath, std::string path, 
-              std::optional<uint> minRating, std::optional<uint> maxRating) : 
+    const Filters filters;
+    Arguments(std::string range, std::string tempPath, std::string path, Filters filters) : 
         range(range),
         tempPath(tempPath),
         downloadPath(tempPath + "/downloads/"),
         extractPath(tempPath + "/extracts/"),
         csvPath(path),
-        minRating(minRating), maxRating(maxRating){}
+        filters(filters){}
 };
 
 namespace ArgumentParsing {
@@ -35,6 +35,7 @@ namespace ArgumentParsing {
             ("p,path", "Path for extracted data", cxxopts::value<std::string>()->default_value("./data.csv"))
             ("min_rating", "Minimum player rating", cxxopts::value<uint>())
             ("max_rating", "Maximum player rating", cxxopts::value<uint>())
+            ("termination", "Allowed termination type\n" + GenerateMatchTerminationDesc(), cxxopts::value<uint>())
         ;
 
         auto result = options.parse(argc, argv);
@@ -54,12 +55,11 @@ namespace ArgumentParsing {
                     result["range"].as<std::string>(),
                     result["temp_path"].as<std::string>(),
                     result["path"].as<std::string>(),
-                    result.count("min_rating") ?
-                    result["min_rating"].as<uint>() :
-                    std::optional<uint>(),
-                    result.count("max_rating") ?
-                    result["max_rating"].as<uint>() :
-                    std::optional<uint>()
+                    Filters(
+                        result.count("min_rating") ? result["min_rating"].as<uint>() : std::optional<uint>(),
+                        result.count("max_rating") ? result["max_rating"].as<uint>() : std::optional<uint>(),
+                        result.count("termination") ? (MatchTermination) result["termination"].as<uint>() : std::optional<MatchTermination>()
+                        )
                     );
         } catch (const cxxopts::missing_argument_exception &e) {
             printf("\nMissing argument: %s\n", e.what());
