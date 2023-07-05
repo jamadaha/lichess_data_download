@@ -17,17 +17,6 @@ find_package(CURL REQUIRED)
 include_directories(${CURL_INCLUDE_DIR})
 
 ###############################################################################
-# PQXX
-###############################################################################
-
-FetchContent_Declare(
-    pqxx
-    GIT_REPOSITORY https://github.com/jtv/libpqxx
-    GIT_TAG 7.7.5
-)
-FetchContent_MakeAvailable(pqxx)
-
-###############################################################################
 # Download
 ###############################################################################
 
